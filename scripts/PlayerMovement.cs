@@ -28,6 +28,9 @@ public class PlayerMovement : MonoBehaviour
     public Transform gCheck3;
     public float checkR;
     public LayerMask whatIsGround;
+
+    //the amount the jumps are reduced when releasing "jump" ealry
+    public float jumpSlow;
     
     //number of jumps available, will always be 2 by default
     private int extraJumps;
@@ -166,10 +169,16 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = Vector2.up * jForce;
             extraJumps--;
         }
-        //lets the player jump if they are touching the ground
+        //lets the player jump if they are touching the ground but have no jumps, however these should reset anyway
         else if (Input.GetKeyDown("space") && extraJumps == 0 && isGrounded == true)
         {
             rb.velocity = Vector2.up * jForce;
+        }
+        //this if lets the player control the height of their jump depending how long they hold space bar
+        //if tehy hold space till the top of the jump this statement wont be called, how nifty
+        if (Input.GetKeyUp("space") && rb.velocity.y > 0)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * jumpSlow);
         }
 
         //if the umbrella shadow is off and the mouse is clicked down the umbrella shadow will be enabled

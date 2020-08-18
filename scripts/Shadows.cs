@@ -42,6 +42,7 @@ public class Shadows : MonoBehaviour
             //shadow is 30 units long so must be -15 under each platform to not stick through
             Vector3 fixPos = temp + (new Vector3(0, -15, 0));
             shadows[i] = Instantiate(shadow1, fixPos, Quaternion.identity);
+            shadows[i].transform.localScale = new Vector3(array[i].transform.localScale.x, shadow1.transform.localScale.y, shadow1.transform.localScale.z);
             
         }
 
