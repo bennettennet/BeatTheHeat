@@ -29,6 +29,16 @@ public class PlayerMovement : MonoBehaviour
     public float checkR;
     public LayerMask whatIsGround;
 
+    //variables for dash
+    //speed of dash, says on the tin
+    public float dashSpeed;
+    //time spent in dash animation
+    public float dashTime;
+    //the timer used to measure how far through the dash
+    private float dashCounter;
+    //work around to get a timer down for the dash
+    private bool dashCounterDown = false;
+
     //the amount the jumps are reduced when releasing "jump" ealry
     public float jumpSlow;
     
@@ -62,11 +72,14 @@ public class PlayerMovement : MonoBehaviour
     public static bool canDie = false;
 
 
+
+
     void Start() 
     {
         //sets the initial jumps to full as the player always spawns on the ground
         extraJumps = extraJumpsValue;
         rb = GetComponent<Rigidbody2D>();
+        dashCounter = dashTime;
         
     }
 
@@ -100,6 +113,8 @@ public class PlayerMovement : MonoBehaviour
             moveInput = Input.GetAxis("Horizontal");
             rb.velocity = new Vector2(moveInput * speed, rb.velocity.y);
         }
+        
+        
             
         //coordiante movement direction with player sprite
         if (facingRight == false && moveInput > 0)
@@ -116,6 +131,57 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+
+        //super cool dash which knows direction based on last key pressed
+        //while the dash is still in motion
+        if (dashCounter > 0)
+        {
+            if (Input.GetKeyDown(KeyCode.LeftShift))
+            {
+                //using the function for sprite to tell the direction the player is facing in
+                if (facingRight == true)
+                {
+                    //stops player from changing directions mid dash
+                    stasis = true;
+                    rb.velocity = Vector2.right * dashSpeed;
+                    //starts the timer down, can't be called here as it is only a single frame
+                    dashCounterDown = true;
+                }
+                if (facingRight == false)
+                {
+                    //stops player from changing directions mid dash
+                    stasis = true;
+                    rb.velocity = Vector2.left * dashSpeed;
+                    //starts the timer down, can't be called here as it is only a single frame
+                    dashCounterDown = true;
+                }
+            }
+
+        }
+        else
+        {
+            //allows player to move again
+            stasis = false;
+            //stops timer going down
+            dashCounterDown = false;
+            //stops the players velocity as it goes very fast in the dash
+            rb.velocity = Vector2.zero;
+            //resets dash timer
+            dashCounter = dashTime;
+        }
+        //starts the timer down for dash
+        if (dashCounterDown == true)
+        {
+            dashCounter -= Time.deltaTime;
+            //stops the player moving vertically during the dash 
+            rb.velocity = new Vector2(rb.velocity.x, 0);
+        }
+
+
+        
+
+        
+
         //checks if the player is dead when there are no shadows and its umbrella shadow is not on
         if (canDie == true && Shadows.Ushadow == false)
         {
@@ -194,6 +260,12 @@ public class PlayerMovement : MonoBehaviour
         
 
     }
+
+    
+
+
+
+
     //flips the player sprite
     void Flip()
     {
@@ -226,7 +298,6 @@ public class PlayerMovement : MonoBehaviour
     {
         
         count++;
-        Debug.Log("ENTER " + count);
         //tells that the player is now under 2 shadows
         if (count == 2)
         {
@@ -248,7 +319,6 @@ public class PlayerMovement : MonoBehaviour
         if (count == 0)
         {
             //if the player is not under any shadows he can now die
-            Debug.Log("EXIT "+count);
             canDie = true;
         }
         

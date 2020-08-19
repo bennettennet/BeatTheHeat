@@ -1844,6 +1844,8 @@ MonoBehaviour:
   whatIsGround:
     serializedVersion: 2
     m_Bits: 256
+  dashSpeed: 50
+  dashTime: 0.1
   jumpSlow: 0.6
   extraJumpsValue: 0
   hangTime: 0.09

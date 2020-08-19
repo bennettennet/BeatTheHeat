@@ -46,7 +46,6 @@ public class GameManager : MonoBehaviour
     //changes the text that wasn't present before to show game over
     public void GameOver()
     {
-        Debug.Log("game over");
         text1.text = "GAME OVER";
         text2.text = "PRESS SPACE TO RESTART";
 
