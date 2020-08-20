@@ -23,6 +23,7 @@ public class PlayerSprite : MonoBehaviour
     {
         rend.sprite = burnt;
         PlayerMovement.stasis = true;
+        PlayerMovement.canDash = false;
     }
     //changes the skin to the defualt one
     public void GetNormal()

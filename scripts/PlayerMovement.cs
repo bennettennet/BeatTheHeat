@@ -17,6 +17,7 @@ public class PlayerMovement : MonoBehaviour
     private float moveInput;
 
     private Rigidbody2D rb;
+    public GameObject player;
 
     //used to change the way the sprite faces
     private bool facingRight = true;
@@ -38,6 +39,15 @@ public class PlayerMovement : MonoBehaviour
     private float dashCounter;
     //work around to get a timer down for the dash
     private bool dashCounterDown = false;
+    //much like grounded in that the single dash is reset by touching ground
+    private float groundDashCount = 1;
+    //the cooldown of the dash
+    public float dashCooldown = 1;
+    private float dashCooldownCounter = 999;
+    //whether or not player can dash
+    public static bool canDash = true;
+    //the dash particle effect
+    public GameObject dashEffect;
 
     //the amount the jumps are reduced when releasing "jump" ealry
     public float jumpSlow;
@@ -80,7 +90,9 @@ public class PlayerMovement : MonoBehaviour
         extraJumps = extraJumpsValue;
         rb = GetComponent<Rigidbody2D>();
         dashCounter = dashTime;
-        
+        canDash = true;
+
+
     }
 
     private void FixedUpdate()
@@ -112,6 +124,8 @@ public class PlayerMovement : MonoBehaviour
         {
             moveInput = Input.GetAxis("Horizontal");
             rb.velocity = new Vector2(moveInput * speed, rb.velocity.y);
+            
+
         }
         
         
@@ -136,24 +150,41 @@ public class PlayerMovement : MonoBehaviour
         //while the dash is still in motion
         if (dashCounter > 0)
         {
-            if (Input.GetKeyDown(KeyCode.LeftShift))
+            //checks to see if the player has already dashed this jump cycle
+            if (canDash)
             {
-                //using the function for sprite to tell the direction the player is facing in
-                if (facingRight == true)
+
+                if (Input.GetKeyDown(KeyCode.LeftShift))
                 {
-                    //stops player from changing directions mid dash
-                    stasis = true;
-                    rb.velocity = Vector2.right * dashSpeed;
-                    //starts the timer down, can't be called here as it is only a single frame
-                    dashCounterDown = true;
-                }
-                if (facingRight == false)
-                {
-                    //stops player from changing directions mid dash
-                    stasis = true;
-                    rb.velocity = Vector2.left * dashSpeed;
-                    //starts the timer down, can't be called here as it is only a single frame
-                    dashCounterDown = true;
+                    //using the function for sprite to tell the direction the player is facing in
+                    if (facingRight == true)
+                    {
+                        //stops player from changing directions mid dash
+                        stasis = true;
+                        rb.velocity = Vector2.right * dashSpeed;
+                        //calls the particle effect
+                        Instantiate(dashEffect, transform.position, Quaternion.identity);
+                        //starts the timer down, can't be called here as it is only a single frame
+                        dashCounterDown = true;
+                        //makes the player shrink for the duration of dash
+                        player.transform.localScale = new Vector2(0.5f, 0.5f);
+                        //variable that prevents more then one dash per jump
+                        groundDashCount--;
+                    }
+                    if (facingRight == false)
+                    {
+                        //stops player from changing directions mid dash
+                        stasis = true;
+                        rb.velocity = Vector2.left * dashSpeed;
+                        //calls the particle effect
+                        Instantiate(dashEffect, transform.position, Quaternion.identity);
+                        //starts the timer down, can't be called here as it is only a single frame
+                        dashCounterDown = true;
+                        //makes the player shrink for the duration of dash
+                        player.transform.localScale = new Vector2(0.5f, 0.5f);
+                        //variable that prevents more then one dash per jump
+                        groundDashCount--;
+                    }
                 }
             }
 
@@ -162,25 +193,56 @@ public class PlayerMovement : MonoBehaviour
         {
             //allows player to move again
             stasis = false;
+            //reverts player size back to normal
+            //also checks to see the direction facing as the sprite also uses the x axis to flip
+            if (facingRight == true)
+            {
+                player.transform.localScale = new Vector2(1, 1);
+            }
+            if (facingRight == false)
+            {
+                player.transform.localScale = new Vector2(-1, 1);
+            }
             //stops timer going down
             dashCounterDown = false;
             //stops the players velocity as it goes very fast in the dash
             rb.velocity = Vector2.zero;
             //resets dash timer
             dashCounter = dashTime;
+            //sets the cooldown which also starts it ticking down
+            dashCooldownCounter = dashCooldown;
+
+
+
         }
-        //starts the timer down for dash
+        //starts the timer down for dash animation
         if (dashCounterDown == true)
         {
             dashCounter -= Time.deltaTime;
             //stops the player moving vertically during the dash 
             rb.velocity = new Vector2(rb.velocity.x, 0);
         }
+        //starts the timer for the dash cooldown
+        if (dashCooldownCounter <= dashCooldown)
+        {
+            //starts  countdown
+            dashCooldownCounter -= Time.deltaTime;
+            if (dashCooldownCounter > 0)
+            {
+                //while cooldown is acitve u can't dash
+                canDash = false;
+            }
+            else if ((dashCooldownCounter  < 0) && (groundDashCount > 0) )
+            {
+                //if the player still has a dash left or is grounded they can dash
+                canDash = true;
+            }
+        }
 
 
-        
 
-        
+
+
 
         //checks if the player is dead when there are no shadows and its umbrella shadow is not on
         if (canDie == true && Shadows.Ushadow == false)
@@ -223,29 +285,35 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        //resets jumps when touching ground
+        //resets jumps when touching ground and dash counter
         if (isGrounded == true)
         {
             extraJumps = extraJumpsValue;
+            groundDashCount = 1;
+            
         }
 
-        //makes the player jump if they have remaining jumps left
-        if (Input.GetKeyDown("space") && extraJumps > 0)
+        if (stasis == false)
         {
-            rb.velocity = Vector2.up * jForce;
-            extraJumps--;
+            //makes the player jump if they have remaining jumps left
+            if (Input.GetKeyDown("space") && extraJumps > 0)
+            {
+                rb.velocity = Vector2.up * jForce;
+                extraJumps--;
+            }
+            //lets the player jump if they are touching the ground but have no jumps, however these should reset anyway
+            else if (Input.GetKeyDown("space") && extraJumps == 0 && isGrounded == true)
+            {
+                rb.velocity = Vector2.up * jForce;
+            }
+            //this if lets the player control the height of their jump depending how long they hold space bar
+            //if tehy hold space till the top of the jump this statement wont be called, how nifty
+            if (Input.GetKeyUp("space") && rb.velocity.y > 0)
+            {
+                rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * jumpSlow);
+            }
         }
-        //lets the player jump if they are touching the ground but have no jumps, however these should reset anyway
-        else if (Input.GetKeyDown("space") && extraJumps == 0 && isGrounded == true)
-        {
-            rb.velocity = Vector2.up * jForce;
-        }
-        //this if lets the player control the height of their jump depending how long they hold space bar
-        //if tehy hold space till the top of the jump this statement wont be called, how nifty
-        if (Input.GetKeyUp("space") && rb.velocity.y > 0)
-        {
-            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * jumpSlow);
-        }
+            
 
         //if the umbrella shadow is off and the mouse is clicked down the umbrella shadow will be enabled
         if (Input.GetMouseButtonDown(0) && Shadows.Ushadow == false)
