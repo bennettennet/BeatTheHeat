@@ -13,6 +13,9 @@ public class PlayerSprite : MonoBehaviour
     //particle effect on death
     public GameObject deathEffect;
 
+    //jump animation
+    public Animation jumpAni;
+
     void Start()
     {
         //intiating stuff
@@ -33,6 +36,12 @@ public class PlayerSprite : MonoBehaviour
     public void GetNormal()
     {
         rend.sprite = normal;
+    }
+
+    public void JumpAniPlay()
+    {
+        
+        jumpAni.Play();
     }
 
 }

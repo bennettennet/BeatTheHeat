@@ -87,7 +87,7 @@ public class PlayerMovement : MonoBehaviour
     //checks if the player can use there umbrella, only used in the tutorial level
     public bool canUmbrella = true;
 
-
+    
 
 
     void Start() 
@@ -321,6 +321,9 @@ public class PlayerMovement : MonoBehaviour
             {
                 rb.velocity = Vector2.up * jForce;
                 extraJumps--;
+                //plays jump animation
+                PlayerSprite.PS.JumpAniPlay(); 
+
                 //checks the player is in the air to enable the effect
                 if(isGrounded == false)
                 {
@@ -346,7 +349,9 @@ public class PlayerMovement : MonoBehaviour
             //if the umbrella shadow is off and the mouse is clicked down the umbrella shadow will be enabled
             if (Input.GetMouseButtonDown(0) && Shadows.Ushadow == false)
             {
+                //Turns the shadow of the umbrella on and calls other functions
                 Shadows.S.TurnOnUShadow();
+                
             }
             //if the umbrella is on and the mouse button released the umbrella shadow will be disabled
             else if (Input.GetMouseButtonUp(0) && Shadows.Ushadow == true)

@@ -14,12 +14,19 @@ public class Umbrella : MonoBehaviour
 
     public static Umbrella U;
 
+    //the animation played when play activates their umbrella
+    public Animation umbrellaUp;
+    public Animation umbrellaDown;
+
+    //timer to stop players spammikng umbrella and to also allow closing animation to play
+    private float umbrellaCooldown = 0.1f;
+
     void Start()
     {
         //intiating variables
         U = this;
         rend = GetComponent<SpriteRenderer>();
-
+        
     }
 
     //changes the value of the umbrella health as its held by player
@@ -44,6 +51,34 @@ public class Umbrella : MonoBehaviour
         }
     }
 
-    
+    //function that plays the open umberlla aniamtion
+    public void UmbrellaUpPlay()
+    {
+        umbrellaUp.Play();
+    }
+
+    //function that plays the close umberlla aniamtion
+    public void UmbrellaDownPlay()
+    {
+        umbrellaDown.Play("UmbrellaDown");
+        StartCoroutine(UmbrellaDowning());
+    }
+
+    IEnumerator UmbrellaDowning()
+    {
+        yield return new WaitForSeconds(umbrellaCooldown);
+        
+        Debug.Log("tick");
+        if (Shadows.Ushadow == false)
+        {
+            Shadows.S.umbrellaShadowRend.enabled = false;
+            Shadows.S.umbrellaRend.enabled = false;
+        }
+        
+    }
+
+
+
+
 
 }

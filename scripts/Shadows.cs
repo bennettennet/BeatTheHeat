@@ -21,6 +21,8 @@ public class Shadows : MonoBehaviour
     public Renderer umbrellaRend;
     //player starts with his umbrella off
     public static bool Ushadow = false;
+
+    
     
     
     void Start()
@@ -31,6 +33,7 @@ public class Shadows : MonoBehaviour
         
         umbrellaShadowRend.enabled = false;
         umbrellaRend.enabled = false;
+
 
         
 
@@ -52,7 +55,10 @@ public class Shadows : MonoBehaviour
     public void TurnOnUShadow()
     {
         Ushadow = true;
-        
+
+        //plays the umbrella up aniamtion from Umbrella script
+        Umbrella.U.UmbrellaUpPlay(); 
+
         umbrellaShadowRend.enabled = true;
         umbrellaRend.enabled = true;
         //changes the transparency of the umbrella shadow so it is now visable to the user
@@ -64,19 +70,20 @@ public class Shadows : MonoBehaviour
 
     }
 
-    //called when player disables their umbrella
+    //called when player disables their umbrella to play the down animation
     public void TurnOffUShadow()
     {
         Ushadow = false;
-        
-        umbrellaShadowRend.enabled = false;
-        umbrellaRend.enabled = false;
-
         //calls functions to change health of umbrella, both are called as only the one needed will activate
         HealthBar.HB.UHealthUp();
         HealthBar.HB.UHealthDown();
+        
+        //plays the umbrella down aniamtion from Umbrella script
+        Umbrella.U.UmbrellaDownPlay();
 
     }
+
+   
 
     //removes the umbrella sprite when the player disables the umbrella
     //This variable may not actually be called anywhere anymore but im too afraid to touch it
@@ -89,6 +96,8 @@ public class Shadows : MonoBehaviour
         HealthBar.HB.UHealthDown();
 
     }
+
+
 
 
 
