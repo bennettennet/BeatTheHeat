@@ -10,6 +10,9 @@ public class PlayerSprite : MonoBehaviour
     private SpriteRenderer rend;
     public static PlayerSprite PS;
 
+    //particle effect on death
+    public GameObject deathEffect;
+
     void Start()
     {
         //intiating stuff
@@ -24,6 +27,7 @@ public class PlayerSprite : MonoBehaviour
         rend.sprite = burnt;
         PlayerMovement.stasis = true;
         PlayerMovement.canDash = false;
+        Instantiate(deathEffect, transform.position, Quaternion.identity);
     }
     //changes the skin to the defualt one
     public void GetNormal()

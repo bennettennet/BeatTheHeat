@@ -27,7 +27,7 @@ public class Shadows : MonoBehaviour
     {
         //intiating variables
         S = this;
-        shadow1.GetComponent<Renderer>().material.color = new Color(1.0f, 1.0f, 1.0f, 0.3f);
+        shadow1.GetComponent<Renderer>().material.color = new Color(0f, 0f, 0f, 0.3f);
         
         umbrellaShadowRend.enabled = false;
         umbrellaRend.enabled = false;
@@ -56,7 +56,7 @@ public class Shadows : MonoBehaviour
         umbrellaShadowRend.enabled = true;
         umbrellaRend.enabled = true;
         //changes the transparency of the umbrella shadow so it is now visable to the user
-        umbrellaShadow.GetComponent<Renderer>().material.color = new Color(1.0f, 1.0f, 1.0f, 0.2f);
+        umbrellaShadow.GetComponent<Renderer>().material.color = new Color(0f, 0f, 0f, 0.2f);
 
         //calls functions to change health of umbrella, both are called as only the one needed will activate
         HealthBar.HB.UHealthDown();

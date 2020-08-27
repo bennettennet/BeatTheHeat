@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 //WELCOME TO THE RESTAURANT
 //TODAYS SPECIAL : SPAGHETTI
 
+//also this is more of an everything script now for the player not just movement
 public class PlayerMovement : MonoBehaviour
 {
     //speed of horizontal player movement
@@ -56,6 +57,8 @@ public class PlayerMovement : MonoBehaviour
     private int extraJumps;
     //number of jumps the player has used, eg. 1 out of 2
     public int extraJumpsValue;
+    //jump particle effect
+    public GameObject jumpEffect;
 
     //checks if the player is safe under a shadow
     public static bool shadowed = true;
@@ -81,6 +84,9 @@ public class PlayerMovement : MonoBehaviour
     //used for checking if the lpayer is under multiple shadows then exiting one won't kill him
     public static bool canDie = false;
 
+    //checks if the player can use there umbrella, only used in the tutorial level
+    public bool canUmbrella = true;
+
 
 
 
@@ -91,6 +97,12 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         dashCounter = dashTime;
         canDash = true;
+
+        if (SceneManager.GetActiveScene().buildIndex == 1)
+        {
+            canUmbrella = false;
+            canDash = false;
+        }
 
 
     }
@@ -266,13 +278,22 @@ public class PlayerMovement : MonoBehaviour
         //calls function when player is dead and restarts level
         if (dead == true)
         {
-            PlayerSprite.PS.GetBurnt();
+            //looks wierd but just checks if its already beened called, had to implement it so it didn't keep calling death effect
+            if(PlayerSprite.PS.GetComponent<SpriteRenderer>().sprite != PlayerSprite.PS.burnt)
+            {
+                PlayerSprite.PS.GetBurnt();
+            }
+
+            //slows the player to a stop when their dead
+            rb.velocity = new Vector2(rb.velocity.x*0.99f, rb.velocity.y);
+
             GameManager.GM.GameOver();
             if (Input.GetKeyDown("space"))
             {
                 Restart();
             }
-            
+
+
         }
         //resets the timer on restart
         if (GameManager.playin == false)
@@ -281,7 +302,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 Time.timeScale = 0f;
                 GameManager.playin = true;
-                Restart();
+                NextLevel();
             }
         }
 
@@ -300,6 +321,12 @@ public class PlayerMovement : MonoBehaviour
             {
                 rb.velocity = Vector2.up * jForce;
                 extraJumps--;
+                //checks the player is in the air to enable the effect
+                if(isGrounded == false)
+                {
+                    
+                    Instantiate(jumpEffect, new Vector3(transform.position.x, transform.position.y-0.5f, transform.position.z), Quaternion.identity);
+                }
             }
             //lets the player jump if they are touching the ground but have no jumps, however these should reset anyway
             else if (Input.GetKeyDown("space") && extraJumps == 0 && isGrounded == true)
@@ -314,17 +341,20 @@ public class PlayerMovement : MonoBehaviour
             }
         }
             
-
-        //if the umbrella shadow is off and the mouse is clicked down the umbrella shadow will be enabled
-        if (Input.GetMouseButtonDown(0) && Shadows.Ushadow == false)
+        if (canUmbrella == true)
         {
-            Shadows.S.TurnOnUShadow();
+            //if the umbrella shadow is off and the mouse is clicked down the umbrella shadow will be enabled
+            if (Input.GetMouseButtonDown(0) && Shadows.Ushadow == false)
+            {
+                Shadows.S.TurnOnUShadow();
+            }
+            //if the umbrella is on and the mouse button released the umbrella shadow will be disabled
+            else if (Input.GetMouseButtonUp(0) && Shadows.Ushadow == true)
+            {
+                Shadows.S.TurnOffUShadow();
+            }
         }
-        //if the umbrella is on and the mouse button released the umbrella shadow will be disabled
-        else if (Input.GetMouseButtonUp(0) && Shadows.Ushadow == true)
-        {
-            Shadows.S.TurnOffUShadow();
-        }
+            
         
 
     }
@@ -345,7 +375,7 @@ public class PlayerMovement : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        
+
         //if the plyaer touches the large object below the screen he respawns
         if (collision.gameObject.tag == "Respawn")
         {
@@ -360,6 +390,19 @@ public class PlayerMovement : MonoBehaviour
             GameManager.GM.Finish();
             Time.timeScale = 0f;
         }
+        //detects collision with umbrella item to then enable that item
+        else if (collision.gameObject.name == "umbrella")
+        {
+            canUmbrella = true;
+            PickUps.PU.UmbrellaTake();
+        }
+        //detects collsion with dash pick up and enables it
+        else if (collision.gameObject.name == "DashPickUp")
+        {
+            PickUps.PU.DashTake();
+            canDash = true;
+        }
+
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -411,6 +454,21 @@ public class PlayerMovement : MonoBehaviour
 
         
             
+    }
+
+    //function called when the finish is hit and the user presses space to go to the next level
+    public void NextLevel()
+    {
+
+        Time.timeScale = 1;
+        dead = false;
+        Shadows.Ushadow = false;
+        count = 0;
+        canDie = false;
+        PlayerSprite.PS.GetNormal();
+        stasis = false;
+        //gets the next level and loads in from build manager
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 
 }
