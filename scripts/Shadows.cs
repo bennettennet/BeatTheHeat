@@ -51,6 +51,16 @@ public class Shadows : MonoBehaviour
 
     }
 
+    private void Update()
+    {
+        for (int i = 0; i < array.Length; i++)
+        {
+            shadows[i].GetComponent<Transform>().position = new Vector3(array[i].transform.position.x, shadows[i].transform.localPosition.y, shadows[i].transform.localPosition.z);
+        }
+
+
+    }
+
     //called when player enables their umbrella
     public void TurnOnUShadow()
     {
