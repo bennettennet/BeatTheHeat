@@ -49,6 +49,8 @@ public class PlayerMovement : MonoBehaviour
     public static bool canDash = true;
     //the dash particle effect
     public GameObject dashEffect;
+    //the dash trail effect
+    public ParticleSystem dashTrail;
 
     //the amount the jumps are reduced when releasing "jump" ealry
     public float jumpSlow;
@@ -175,11 +177,11 @@ public class PlayerMovement : MonoBehaviour
                         stasis = true;
                         rb.velocity = Vector2.right * dashSpeed;
                         //calls the particle effect
-                        Instantiate(dashEffect, transform.position, Quaternion.identity);
+                        dashTrail.Play();
                         //starts the timer down, can't be called here as it is only a single frame
                         dashCounterDown = true;
                         //makes the player shrink for the duration of dash
-                        player.transform.localScale = new Vector2(0.5f, 0.5f);
+                        player.transform.localScale = new Vector2(0.3f, 0.3f);
                         //variable that prevents more then one dash per jump
                         groundDashCount--;
                     }
@@ -189,11 +191,11 @@ public class PlayerMovement : MonoBehaviour
                         stasis = true;
                         rb.velocity = Vector2.left * dashSpeed;
                         //calls the particle effect
-                        Instantiate(dashEffect, transform.position, Quaternion.identity);
+                        dashTrail.Play();
                         //starts the timer down, can't be called here as it is only a single frame
                         dashCounterDown = true;
                         //makes the player shrink for the duration of dash
-                        player.transform.localScale = new Vector2(0.5f, 0.5f);
+                        player.transform.localScale = new Vector2(0.3f, 0.3f);
                         //variable that prevents more then one dash per jump
                         groundDashCount--;
                     }
